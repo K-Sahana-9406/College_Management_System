@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>User - View Courses</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <h1>User - Course List</h1>
+
+  <table id="courseTable">
+    <thead>
+      <tr><th>ID</th><th>Title</th><th>Description</th></tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+<br><br>
+  <button onclick="location.href='/index.html'">Back to Home</button>
+
+  <script >
+    document.addEventListener('DOMContentLoaded', () => {
+  const tableBody = document.querySelector('#courseTable tbody');
+
+  fetch('/api/courses')
+    .then(res => res.json())
+    .then(data => {
+      tableBody.innerHTML = '';
+      data.forEach(course => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${course.id}</td>
+          <td>${course.title}</td>
+          <td>${course.description}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    });
+});
+
+  </script>
+</body>
+</html>

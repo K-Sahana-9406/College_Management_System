@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Admin - Manage Students</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <h1>Admin - Student Management</h1>
+
+  <form id="studentForm">
+    <input type="hidden" id="studentId">
+    <input type="text" id="name" placeholder="Name" required>
+    <input type="email" id="email" placeholder="Email" required>
+    <input type="text" id="course" placeholder="Course" required>
+    <button type="submit">Save Student</button>
+  </form>
+
+  <h2>Student List</h2>
+  <table id="studentTable">
+    <thead>
+      <tr>
+        <th>ID</th><th>Name</th><th>Email</th><th>Course</th><th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <br><br>
+  <button onclick="location.href='/index.html'">Back to Home</button>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('studentForm');
+  const idField = document.getElementById('studentId');
+  const nameField = document.getElementById('name');
+  const emailField = document.getElementById('email');
+  const courseField = document.getElementById('course');
+  const tableBody = document.querySelector('#studentTable tbody');
+
+  function fetchStudents() {
+    fetch('/api/students')
+      .then(res => res.json())
+      .then(data => {
+        tableBody.innerHTML = '';
+        data.forEach(student => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${student.id}</td>
+            <td>${student.name}</td>
+            <td>${student.email}</td>
+            <td>${student.course}</td>
+            <td>
+              <button onclick="editStudent(${student.id}, '${student.name}', '${student.email}', '${student.course}')">Edit</button>
+              <button onclick="deleteStudent(${student.id})">Delete</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+  }
+
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const student = {
+      name: nameField.value,
+      email: emailField.value,
+      course: courseField.value
+    };
+
+    if (idField.value) {
+      fetch(`/api/students/${idField.value}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(student)
+      }).then(() => {
+        form.reset();
+        fetchStudents();
+      });
+    } else {
+      fetch('/api/students', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(student)
+      }).then(() => {
+        form.reset();
+        fetchStudents();
+      });
+    }
+  };
+
+  window.editStudent = (id, name, email, course) => {
+    idField.value = id;
+    nameField.value = name;
+    emailField.value = email;
+    courseField.value = course;
+  };
+
+  window.deleteStudent = (id) => {
+    fetch(`/api/students/${id}`, { method: 'DELETE' }).then(fetchStudents);
+  };
+
+  fetchStudents();
+});
+
+  </script>
+</body>
+</html>
+

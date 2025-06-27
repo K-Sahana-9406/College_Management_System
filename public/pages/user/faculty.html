@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>User - Faculty Info</title>
+  <link rel="stylesheet" href="../../css/style.css" />
+</head>
+<body>
+  <h1>User Panel - Faculty Information</h1>
+
+
+  <h2>Faculty List</h2>
+  <table border="1">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Department</th>
+        <th>Email</th>
+      </tr>
+    </thead>
+    <tbody id="facultyTableBody"></tbody>
+  </table>
+<br><br>
+  <button onclick="location.href='/index.html'">Back to Home</button>
+  <script>
+    const tableBody = document.getElementById('facultyTableBody');
+
+function loadFaculty() {
+  fetch('/api/faculty')
+    .then(res => res.json())
+    .then(data => {
+      tableBody.innerHTML = '';
+      data.forEach(faculty => {
+        const row = document.createElement('tr');
+        row.innerHTML = `
+          <td>${faculty.id}</td>
+          <td>${faculty.name}</td>
+          <td>${faculty.department}</td>
+          <td>${faculty.email}</td>
+        `;
+        tableBody.appendChild(row);
+      });
+    });
+}
+
+loadFaculty();
+
+  </script>
+</body>
+</html>

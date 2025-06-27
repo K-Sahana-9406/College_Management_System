@@ -1,0 +1,125 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Faculty Management</title>
+  <link rel="stylesheet" href="../../css/style.css">
+</head>
+<body>
+  <h1>Faculty Management</h1>
+  <form id="facultyForm">
+    <input type="hidden" id="facultyId">
+  
+    <input type="text" id="name" placeholder="Name" required>
+
+  
+    <input type="email" id="email" placeholder="Email" required>
+
+   
+    <input type="text" id="department" placeholder="Department" required>
+
+    <button type="submit">Save Faculty</button>
+  </form>
+
+  <h2>Faculty List</h2>
+  <table id="facultyTable">
+    <thead>
+      <tr>
+        <th>ID</th>
+        <th>Name</th>
+        <th>Email</th>
+        <th>Department</th>
+        <th>Actions</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+<br><br>
+  <button onclick="location.href='/index.html'">Back to Home</button>
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+  const form = document.getElementById('facultyForm');
+  const idField = document.getElementById('facultyId');
+  const nameField = document.getElementById('name');
+  const emailField = document.getElementById('email');
+  const departmentField = document.getElementById('department');
+  const tableBody = document.querySelector('#facultyTable tbody');
+
+  // Fetch and display all faculty members
+  function fetchFaculty() {
+    fetch('/api/faculty')
+      .then(res => res.json())
+      .then(data => {
+        tableBody.innerHTML = '';  // Clear existing table rows
+        data.forEach(faculty => {
+          const row = document.createElement('tr');
+          row.innerHTML = `
+            <td>${faculty.id}</td>
+            <td>${faculty.name}</td>
+            <td>${faculty.email}</td>
+            <td>${faculty.department}</td>
+            <td>
+              <button onclick="editFaculty(${faculty.id}, '${faculty.name}', '${faculty.email}', '${faculty.department}')">Edit</button>
+              <button onclick="deleteFaculty(${faculty.id})">Delete</button>
+            </td>
+          `;
+          tableBody.appendChild(row);
+        });
+      });
+  }
+
+  // Handle form submission for creating or updating a faculty member
+  form.onsubmit = (e) => {
+    e.preventDefault();
+    const faculty = {
+      name: nameField.value,
+      email: emailField.value,
+      department: departmentField.value
+    };
+
+    if (idField.value) {
+      // Update an existing faculty member
+      fetch(`/api/faculty/${idField.value}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(faculty)
+      }).then(() => {
+        form.reset();  // Reset the form
+        fetchFaculty();  // Refresh the faculty list
+      });
+    } else {
+      // Add a new faculty member
+      fetch('/api/faculty', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(faculty)
+      }).then(() => {
+        form.reset();  // Reset the form
+        fetchFaculty();  // Refresh the faculty list
+      });
+    }
+  };
+
+  // Function to populate the form with data for editing a faculty member
+  window.editFaculty = (id, name, email, department) => {
+    idField.value = id;
+    nameField.value = name;
+    emailField.value = email;
+    departmentField.value = department;
+  };
+
+  // Function to delete a faculty member
+  window.deleteFaculty = (id) => {
+    fetch(`/api/faculty/${id}`, { method: 'DELETE' }).then(fetchFaculty);
+  };
+
+  // Initial call to fetch faculty data
+  fetchFaculty();
+});
+
+  </script>
+</body>
+</html>
+
+
